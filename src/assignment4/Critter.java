@@ -230,6 +230,18 @@ public abstract class Critter {
 	 */
 	public static void clearWorld() {
 		// Complete this method.
+		for(int i=0; i<population.size(); i++)
+		{
+			population.remove(i);
+		}
+		for(int j=0; j<alive.size(); j++)
+		{
+			alive.remove(j);
+		}
+		for(int k=0; k<babies.size(); k++)
+		{
+			babies.remove(k);
+		}
 	}
 
 	/**
@@ -244,7 +256,67 @@ public abstract class Critter {
 		// Complete this method.
 	}
 	
-	public static void displayWorld() {
+	public static void displayWorld()
+	{
 		// Complete this method.
+
+		//First Row
+		System.out.print("+"); 													//Top left corner
+		for(int i=0; i<Params.world_width; i++)
+		{
+			System.out.print("-");												// n dashes (width)
+		}
+		System.out.println("+");												//Top right corner
+
+		//Middle Rows
+		int aliveIndex=0;														//iterates through alive array
+		for(int vertical=0; vertical<Params.world_height; vertical++)			//for m rows (height)
+		{
+			System.out.print("|");												//Left hand wall
+			/*
+			while(alive.get(aliveIndex).y_coord<vertical)						//Unnecessary
+			{
+				aliveIndex++;
+			}
+			*/
+			if(alive.get(aliveIndex).y_coord==vertical)																	//If the Critter in alive belongs in that row
+			{
+				for(int horizontal = 0; horizontal < Params.world_width; horizontal++)										//For every column in that row
+				{
+					if(alive.get(aliveIndex).y_coord==vertical && alive.get(aliveIndex).x_coord==horizontal)					//If the Critter in alive belongs in that column & row
+					{
+						System.out.print(alive.get(aliveIndex));																//Print it
+						aliveIndex++;																							//Next Critter
+						while(alive.get(aliveIndex).x_coord==horizontal && alive.get(aliveIndex).y_coord==vertical)				//For every other critter in alive that has the same coordinates
+						{
+							aliveIndex++;																						//Skip them
+						}
+					}
+					else																								//Else just print spaces for that row
+					{
+						System.out.print(" ");
+					}
+
+				}
+				System.out.println("|");
+			}
+			else
+			{
+				for(int horizontal = 0; horizontal < Params.world_width; horizontal++)
+				{
+					System.out.print(" ");
+				}
+				System.out.println("|");
+			}
+		}
+
+
+		//Last Row
+		System.out.print("+");
+		for(int i=0; i<Params.world_width; i++)
+		{
+			System.out.print("-");
+		}
+		System.out.println("+");
 	}
 }
