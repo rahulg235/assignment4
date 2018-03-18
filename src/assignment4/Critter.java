@@ -13,6 +13,8 @@ package assignment4;
  */
 
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /* see the PDF for descriptions of the methods and fields in this class
@@ -21,7 +23,7 @@ import java.util.List;
  */
 
 
-public abstract class Critter {
+public abstract class Critter{
 	private static String myPackage;
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
@@ -46,6 +48,12 @@ public abstract class Critter {
 	
 	private int energy = 0;
 	protected int getEnergy() { return energy; }
+	protected int getX_coord(){
+		return x_coord;
+	}
+	protected int getY_coord(){
+		return y_coord;
+	}
 	
 	private int x_coord;
 	private int y_coord;
@@ -103,10 +111,39 @@ public abstract class Critter {
     }
 	
 	protected final void run(int direction) {
-		
-	}
-	
+		energy = energy-Params.run_energy_cost;
+			if(energy>=0)
+			{
+				walk(direction);
+				walk(direction);
+			}
+		}
+
+
+    /**
+     * @TODO add new critter to collection after time step
+     * @param offspring
+     * @param direction
+     */
 	protected final void reproduce(Critter offspring, int direction) {
+		if(this.energy < Params.min_reproduce_energy) {
+            return;
+        }
+        if(this.energy%2 == 0) {
+		    offspring.energy = this.energy/2;
+		    this.energy = this.energy/2;
+        }
+        else {
+		    offspring.energy = this.energy/2;
+		    this.energy = this.energy/2 +1;
+        }
+        offspring.x_coord = this.x_coord;
+		offspring.y_coord = this.y_coord;
+		offspring.walk(direction);
+
+		//add new critter to collection after time step
+
+
 	}
 
 	public abstract void doTimeStep();
@@ -127,10 +164,15 @@ public abstract class Critter {
 			Class newCritterClass = Class.forName(critter_class_name);
 			Critter newCritter = (Critter) newCritterClass.newInstance();
 			alive.add(newCritter);
+
 			newCritter.x_coord = getRandomInt(Params.world_width);
 			newCritter.y_coord = getRandomInt(Params.world_height);
 			newCritter.energy = Params.start_energy;
 
+
+
+			//Collections.sort(aliveX,Comparator.comparingInt(Critter:: getX_coord).thenComparing(Critter:: getY_coord));
+			Collections.sort(alive, Comparator.comparingInt(Critter:: getY_coord). thenComparing(Critter:: getX_coord));
 		}
 		catch (Exception e){
 			throw new InvalidCritterException(critter_class_name);
@@ -143,11 +185,23 @@ public abstract class Critter {
 	 * @return List of Critters.
 	 * @throws InvalidCritterException
 	 */
-	public static List<Critter> getInstances(String critter_class_name) throws InvalidCritterException {
-		List<Critter> result = new java.util.ArrayList<Critter>();
-	
-		return result;
-	}
+
+    public static List<Critter> getInstances(String critter_class_name) throws InvalidCritterException {
+        List<Critter> result = new java.util.ArrayList<Critter>();
+        try{
+            Class newCritterClass = Class.forName(critter_class_name);
+            Critter newCritter = (Critter) newCritterClass.newInstance();
+            for(int i=0; i<alive.size(); i++)
+            {
+                if(alive.get(i).getClass().getName().equals(critter_class_name))
+                    result.add(alive.get(i));
+            }
+        }
+        catch (Exception e){
+            throw new InvalidCritterException(critter_class_name);
+        }
+        return result;
+    }
 	
 	/**
 	 * Prints out how many Critters of each type there are on the board.
@@ -228,23 +282,156 @@ public abstract class Critter {
 	/**
 	 * Clear the world of all critters, dead and alive
 	 */
-	public static void clearWorld() {
-		// Complete this method.
-	}
+
+    public static void clearWorld() {
+        // Complete this method.
+        for(int i=0; i<population.size(); i++)
+        {
+            population.remove(i);
+        }
+        for(int j=0; j<alive.size(); j++)
+        {
+            alive.remove(j);
+        }
+        for(int k=0; k<babies.size(); k++)
+        {
+            babies.remove(k);
+        }
+    }
 
 	/**
 	 * @TODO dealing with critters in same position, incrementing time steps
 	 */
 	public static void worldTimeStep() {
-		for(int i = 0; i<alive.size(); i++){
+		Collections.sort(alive, Comparator.comparingInt(Critter::getY_coord).thenComparing(Critter::getX_coord));
+		for (int i = 0; i < alive.size(); i++) {
 			alive.get(i).doTimeStep();
 
 		}
+		for (int i = 0; i < alive.size(); i++) {
+			for (int j = i + 1; j < alive.size(); j++) {
+				//checking same position and if alive
+				if (alive.get(i).x_coord == alive.get(j).x_coord && alive.get(i).y_coord == alive.get(j).y_coord && alive.get(i).energy > 0 && alive.get(j).energy > 0) {
 
-		// Complete this method.
+					Critter p1 = alive.get(i);
+					Critter p2 = alive.get(j);
+					if (p1.fight(p2.toString())) { //A wants to fight
+						if (p2.fight(p1.toString())) { //B wants to fight
+							if (p1.x_coord == p2.x_coord && p1.y_coord == p2.y_coord && p1.energy > 0 && p2.energy > 0) {
+								int num1 = p1.getRandomInt(p1.energy);
+								int num2 = p2.getRandomInt(p2.energy);
+								if (num1 >= num2) { //p1 wins
+									p1.energy += (p2.energy / 2);
+									p2.energy = 0; //will be removed later
+								}
+								if (num1 < num2) {
+									//p2 wins
+									p2.energy += (p1.energy / 2);
+									p1.energy = 0; //will be removed later
+								}
+
+
+							}
+
+						} else { //A wants to fight but B doesn't
+							if (p1.x_coord == p2.x_coord && p1.y_coord == p2.y_coord && p1.energy > 0 && p2.energy > 0) {
+								p1.energy += p2.energy / 2;
+								p2.energy = 0;
+							}
+
+						}
+
+					} else {
+						//A doesn't want to fight but B does
+						if (p2.fight(p1.toString())) {
+							if (p1.x_coord == p2.x_coord && p1.y_coord == p2.y_coord && p1.energy > 0 && p2.energy > 0) {
+								p2.energy += p1.energy / 2;
+								p1.energy = 0;
+							}
+
+
+						}
+					}
+
+
+				}
+			}
+
+
+			// Complete this method.
+		}
+		//removing dead critters from collection
+		for(Critter c : alive) {
+			if(c.energy <= 0) {
+				alive.remove(c);
+			}
+		}
+
 	}
 	
 	public static void displayWorld() {
-		// Complete this method.
+		Collections.sort(alive, Comparator.comparingInt(Critter:: getY_coord). thenComparing(Critter:: getX_coord));
+
+			// Complete this method.
+			//First Row
+			System.out.print("+");                                                    //Top left corner
+			for(int i=0; i<Params.world_width; i++)
+			{
+				System.out.print("-");                                                // n dashes (width)
+			}
+			System.out.println("+");                                              //Top right corner
+			//Middle Rows
+			int aliveIndex=0;                                                       //iterates through alive array
+			for(int vertical=0; vertical<Params.world_height; vertical++)            //for m rows (height)
+			{
+				System.out.print("|");                                                //Left hand wall
+            /*
+            while(alive.get(aliveIndex).y_coord<vertical)                        //Unnecessary
+            {
+                aliveIndex++;
+            }
+            */
+				if(alive.get(aliveIndex).y_coord==vertical)                                                                 //If the Critter in alive belongs in that row
+				{
+					for(int horizontal = 0; horizontal < Params.world_width; horizontal++)                                       //For every column in that row
+					{
+						if(alive.get(aliveIndex).y_coord==vertical && alive.get(aliveIndex).x_coord==horizontal)                    //If the Critter in alive belongs in that column & row
+						{
+							System.out.print(alive.get(aliveIndex));                                                                //Print it
+							aliveIndex++;                                                                                           //Next Critter
+							while(alive.get(aliveIndex).x_coord==horizontal && alive.get(aliveIndex).y_coord==vertical)             //For every other critter in alive that has the same coordinates
+							{
+								aliveIndex++;                                                                                       //Skip them
+							}
+						}
+						else                                                                                                //Else just print spaces for that row
+						{
+							System.out.print(" ");
+						}
+					}
+					System.out.println("|");
+				}
+				else
+				{
+					for(int horizontal = 0; horizontal < Params.world_width; horizontal++)
+					{
+						System.out.print(" ");
+					}
+					System.out.println("|");
+				}
+			}
+			//Last Row
+			System.out.print("+");
+			for(int i=0; i<Params.world_width; i++)
+			{
+				System.out.print("-");
+			}
+			System.out.println("+");
+		}
 	}
-}
+		// Complete this method.
+
+
+
+
+
