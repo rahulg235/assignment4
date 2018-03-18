@@ -25,7 +25,7 @@ public abstract class Critter {
 	private static String myPackage;
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
-
+	private static List<Critter> alive = new java.util.ArrayList<Critter>();
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
 	static {
 		myPackage = Critter.class.getPackage().toString().split(" ")[1];
@@ -51,6 +51,15 @@ public abstract class Critter {
 	private int y_coord;
 	
 	protected final void walk(int direction) {
+		this.energy = this.energy - Params.walk_energy_cost;
+		int step = 1;
+		switch(direction){
+			case 0:
+				x_coord = (x_coord + 1)%(Params.world_width-1);
+			case 1:
+				x_coord++;
+				y_coord = y_coor
+		}
 	}
 	
 	protected final void run(int direction) {
@@ -74,6 +83,18 @@ public abstract class Critter {
 	 * @throws InvalidCritterException
 	 */
 	public static void makeCritter(String critter_class_name) throws InvalidCritterException {
+		try{
+			Class newCritterClass = Class.forName(critter_class_name);
+			Critter newCritter = (Critter) newCritterClass.newInstance();
+			alive.add(newCritter);
+			newCritter.x_coord = getRandomInt(Params.world_width);
+			newCritter.y_coord = getRandomInt(Params.world_height);
+			newCritter.energy = Params.start_energy;
+
+		}
+		catch (Exception e){
+			throw new InvalidCritterException(critter_class_name);
+		}
 	}
 	
 	/**
@@ -170,8 +191,16 @@ public abstract class Critter {
 	public static void clearWorld() {
 		// Complete this method.
 	}
-	
+
+	/**
+	 * @TODO dealing with critters in same position, incrementing time steps
+	 */
 	public static void worldTimeStep() {
+		for(int i = 0; i<alive.size(); i++){
+			alive.get(i).doTimeStep();
+
+		}
+
 		// Complete this method.
 	}
 	
