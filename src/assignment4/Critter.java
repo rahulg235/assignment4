@@ -51,16 +51,56 @@ public abstract class Critter {
 	private int y_coord;
 	
 	protected final void walk(int direction) {
-		this.energy = this.energy - Params.walk_energy_cost;
-		int step = 1;
-		switch(direction){
-			case 0:
-				x_coord = (x_coord + 1)%(Params.world_width-1);
-			case 1:
-				x_coord++;
-				y_coord = y_coor
-		}
-	}
+        this.energy = this.energy - Params.walk_energy_cost;
+        int step = 1;
+        switch (direction) {
+            case 0: //increment x
+                x_coord = (x_coord + 1) % (Params.world_width);
+            case 1: //increment x, decrement y
+                x_coord = (x_coord + 1) % (Params.world_width);
+                if (y_coord == 0) {
+                    y_coord = Params.world_height - 1;
+                } else {
+                    y_coord--;
+                }
+            case 2: //decrement y
+                if (y_coord == 0) {
+                    y_coord = Params.world_height - 1;
+                } else {
+                    y_coord--;
+                }
+            case 3: //decrement x and y
+                if (y_coord == 0) {
+                    y_coord = Params.world_height - 1;
+                } else {
+                    y_coord--;
+                }
+                if (x_coord == 0) {
+                    x_coord = Params.world_width - 1;
+                } else {
+                    x_coord--;
+                }
+            case 4: //decrement x
+                if (x_coord == 0) {
+                    x_coord = Params.world_width - 1;
+                } else {
+                    x_coord--;
+                }
+            case 5: //decrement x, increment y
+                if (x_coord == 0) {
+                    x_coord = Params.world_width - 1;
+                } else {
+                    x_coord--;
+                }
+                y_coord = (y_coord + 1) % Params.world_height;
+            case 6: //increment y
+                y_coord = (y_coord + 1) % Params.world_height;
+            case 7: //increment x and y
+                y_coord = (y_coord + 1) % Params.world_height;
+                x_coord = (x_coord + 1) % (Params.world_width);
+
+        }
+    }
 	
 	protected final void run(int direction) {
 		
