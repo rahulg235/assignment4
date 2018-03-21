@@ -13,6 +13,7 @@ package assignment4;
  */
 
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -74,68 +75,74 @@ public abstract class Critter {
      * @TODO walk/run in fight and checking for same position
      */
     protected final void walk(int direction) {
+        System.out.println("WALK: Critter"+ this + " ENERGY: "+ this.energy + " DIRECTION: "+ direction + " NUM MOVE: " + num_move);
         this.energy = this.energy - Params.walk_energy_cost;
         this.num_move++;
         //critter cannot move more than 2 times but energy is still deducted
-        if (this.num_move < 2) {
-            moveFlag = 1;
-            switch (direction) {
-                case 0: //increment x
-                    x_coord = (x_coord + 1) % (Params.world_width-1);
-                case 1: //increment x, decrement y
-                    x_coord = (x_coord + 1) % (Params.world_width-1);
-                    if (y_coord <= 0) {
-                        y_coord = Params.world_height - 1;
-                    } else {
-                        y_coord--;
-                    }
-                case 2: //decrement y
-                    if (y_coord <= 0) {
-                        y_coord = Params.world_height - 1;
-                    } else {
-                        y_coord--;
-                    }
-                case 3: //decrement x and y
-                    if (y_coord <= 0) {
-                        y_coord = Params.world_height - 1;
-                    } else {
-                        y_coord--;
-                    }
-                    if (x_coord <= 0) {
-                        x_coord = Params.world_width - 1;
-                    } else {
-                        x_coord--;
-                    }
-                case 4: //decrement x
-                    if (x_coord <= 0) {
-                        x_coord = Params.world_width - 1;
-                    } else {
-                        x_coord--;
-                    }
-                case 5: //decrement x, increment y
-                    if (x_coord <= 0) {
-                        x_coord = Params.world_width - 1;
-                    } else {
-                        x_coord--;
-                    }
-                    y_coord = (y_coord + 1) % Params.world_height-1;
-                case 6: //increment y
-                    y_coord = (y_coord + 1) % Params.world_height-1;
-                case 7: //increment x and y
-                    y_coord = (y_coord + 1) % Params.world_height-1;
-                    x_coord = (x_coord + 1) % (Params.world_width-1);
+        if (energy >= 0) {
+            if (this.num_move < 2) {
+                moveFlag = 1;
+                switch (direction) {
+                    case 0: //increment x
+                        x_coord = (x_coord + 1) % (Params.world_width);
+                    case 1: //increment x, decrement y
+                        x_coord = (x_coord + 1) % (Params.world_width);
+                        if (y_coord <= 0) {
+                            y_coord = Params.world_height - 1;
+                        } else {
+                            y_coord--;
+                        }
+                    case 2: //decrement y
+                        if (y_coord <= 0) {
+                            y_coord = Params.world_height - 1;
+                        } else {
+                            y_coord--;
+                        }
+                    case 3: //decrement x and y
+                        if (y_coord <= 0) {
+                            y_coord = Params.world_height - 1;
+                        } else {
+                            y_coord--;
+                        }
+                        if (x_coord <= 0) {
+                            x_coord = Params.world_width - 1;
+                        } else {
+                            x_coord--;
+                        }
+                    case 4: //decrement x
+                        if (x_coord <= 0) {
+                            x_coord = Params.world_width - 1;
+                        } else {
+                            x_coord--;
+                        }
+                    case 5: //decrement x, increment y
+                        if (x_coord <= 0) {
+                            x_coord = Params.world_width - 1;
+                        } else {
+                            x_coord--;
+                        }
+                        y_coord = (y_coord + 1) % Params.world_height;
+                    case 6: //increment y
+                        y_coord = (y_coord + 1) % Params.world_height;
+                    case 7: //increment x and y
+                        y_coord = (y_coord + 1) % Params.world_height;
+                        x_coord = (x_coord + 1) % (Params.world_width);
 
+                }
             }
         }
     }
-
     protected final void run(int direction) {
+        System.out.println("RUN: Critter: "+ this + " ENERGY: " + this.energy + " DIRECTION: "+ direction + " NUM_MOVE " + num_move);
         energy = energy - Params.run_energy_cost;
         this.num_move++;
         //critter cannot move more than twice in each time step
         if (this.num_move < 2) {
             if (energy >= 0) {
                 moveFlag = 1;
+                //because walk energy is deducted when walk is called
+                energy = energy + Params.walk_energy_cost;
+                energy = energy + Params.walk_energy_cost;
                 walk(direction);
                 walk(direction);
             }
@@ -149,6 +156,8 @@ public abstract class Critter {
      * @TODO add new critter to collection after time step
      */
     protected final void reproduce(Critter offspring, int direction) {
+        System.out.println("REPRODUCE: Critter " + this + " direction: "+ direction);
+
         if (this.energy < Params.min_reproduce_energy) {
             return;
         }
@@ -347,30 +356,42 @@ public abstract class Critter {
                     int p2_y = p2.y_coord;
 
                     if (p1.fight(p2.toString())){//A wants to fight
+                        System.out.println(p1 + "wants to fight ");
                         //if (p1.moveFlag == 1) { //A moves, no fight btween A B
                         if(p1.checkFightWalk(p1_x, p1_y)){
+                            System.out.println(p1 + " calls walk/run in fight method, no fight");
+                            System.out.println("checking "+ p2+ "for other encounters");
                             checkMulitpleEncounters(p2, j); //check if B has another encounter
                         } else {
                             if (p2.fight(p1.toString())) { // B wants to fight
+                                System.out.println(p2 + "wants to fight ");
                                 //if (p2.moveFlag == 1) { //B moves, no fight between A B
                                 if(p2.checkFightWalk(p2_x, p2_y)){
+                                    System.out.println(p2 + " calls walk/run in fight method, no fight");
+                                    System.out.println("checking "+ p1+ "for other encounters");
                                     checkMulitpleEncounters(p1, i);
                                 } else { //fight between A and B
+                                        System.out.println("~~There should be a fight between " + p1 + " and "+ p2);
                                     if (p1.x_coord == p2.x_coord && p1.y_coord == p2.y_coord && p1.energy > 0 && p2.energy > 0) {
+                                        System.out.println("FIGHT between " + p1 +" and " + p2);
                                         int num1 = p1.getRandomInt(p1.energy);
                                         int num2 = p2.getRandomInt(p2.energy);
                                         if (num1 >= num2) { //p1 wins
+                                            System.out.println(p1 + " WINS FIGHT");
                                             p1.energy += (p2.energy / 2);
                                             p2.energy = 0;//will be removed later
                                             if (p1.moveFlag == 0) {
+                                                System.out.println("checking if " + p1 + "has another encounter");
                                                 checkMulitpleEncounters(p1, i);
                                             }
                                         }
                                         if (num1 < num2) {
                                             //p2 wins
+                                            System.out.println(p2 + " WINS FIGHT");
                                             p2.energy += (p1.energy / 2);
                                             p1.energy = 0; //will be removed later
                                             if (p2.moveFlag == 0) {
+                                                System.out.println("checking if " + p2 + "has another encounter");
                                                 checkMulitpleEncounters(p1, j);
                                             }
                                         }
@@ -381,9 +402,11 @@ public abstract class Critter {
                             //B doesnt want to fight but A does
                             else {
                                 if (p1.x_coord == p2.x_coord && p1.y_coord == p2.y_coord && p1.energy > 0 && p2.energy > 0) {
+                                    System.out.println("SURRENDER: " + p2 + "doesn't want to fight, " + p1 + " wins ");
                                     p1.energy += p2.energy / 2;
                                     p2.energy = 0;
                                     if (p1.moveFlag == 0) {
+                                        System.out.println("checking if " + p1 + "has another encounter");
                                         checkMulitpleEncounters(p1, i);
                                     }
                                 }
@@ -394,17 +417,20 @@ public abstract class Critter {
                     else{
                         //A doesn't want to fight but B does
                         if (p2.fight(p1.toString())) {
+                            System.out.println("SURRENDER: " + p1 + "doesn't want to fight, " + p2  + " wins ");
                             if (p1.x_coord == p2.x_coord && p1.y_coord == p2.y_coord && p1.energy > 0 && p2.energy > 0) {
                                 p2.energy += p1.energy / 2;
                                 p1.energy = 0;
                             }
                             if(p2.moveFlag == 0){
+                                System.out.println("checking if " + p1 + "has another encounter");
                                 checkMulitpleEncounters(p2,j);
                             }
 
 
                         }
                         else{ //A and B dont want to fight, A wins
+                            System.out.println("Encounter but no fight - "+ p1 + " wins");
                             if (p1.x_coord == p2.x_coord && p1.y_coord == p2.y_coord && p1.energy > 0 && p2.energy > 0) {
                                 p1.energy += p2.energy / 2;
                                 p2.energy = 0;
@@ -497,13 +523,15 @@ public abstract class Critter {
             c.energy -= Params.rest_energy_cost;
         }
         //removing dead critters from collection and population
-
+        //add deadCritters to this
+        List <Critter> deadCritters = new ArrayList<Critter>();
         for (Critter c : alive) {
             if (c.energy <= 0) {
-                alive.remove(c);
-                population.remove(c);
+                deadCritters.add(c);
             }
         }
+        alive.removeAll(deadCritters);
+        population.removeAll(deadCritters);
 
 
     }
@@ -514,6 +542,7 @@ public abstract class Critter {
         for (int i = indexOthers; i < alive.size(); i++) {
             Critter o1 = alive.get(i);
             if (p1.x_coord == o1.x_coord && p1.y_coord == o1.y_coord && p1.energy > 0 && o1.energy > 0) {
+                System.out.println("There is another encounter between "+ p1 + " and " + o1);
                 if (p1.fight(o1.toString())) { //A wants to fight
                     if (o1.fight(p1.toString())) { //B wants to fight
                         if (p1.x_coord == o1.x_coord && p1.y_coord == o1.y_coord && p1.energy > 0 && o1.energy > 0) {
@@ -657,15 +686,18 @@ public abstract class Critter {
     //returns true if moved successfully, false if no move/moves back to original position
     private boolean checkFightWalk(int x, int y) {
         if(moveFlag == 0) { //run or walk was not called from fight
+            System.out.println("Critter"+ this + " did not call walk/run from fight method");
             return false;
         }
         for(int i = 0; i<alive.size(); i++){
             if(this != alive.get(i) && this.x_coord == alive.get(i).x_coord && this.y_coord == alive.get(i).y_coord){
                 //can move into a position with a dead critter
                 if(alive.get(i).energy <= 0){
+                    System.out.println("Critter"+ this + " moved into position of dead critter during fight");
                     return true;
                 }
                 else{
+                    System.out.println("Critter"+ this + " encountered another critter trying to escape from fight");
                     setX_coord(x);
                     setY_coord(y);
                     return false;
