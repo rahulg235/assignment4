@@ -1,34 +1,35 @@
 package assignment4;
-//wants to reproduce alot
-public class Critter1 extends Critter {
+//can only move up (direction 0)
+public class Critter2 extends Critter {
     @Override
-    public String toString(){
-        return "1";
+    public String toString() {
+        return "2";
     }
-    private int dir;
-    private int countKids;
 
-    public Critter1(){
-        dir = getRandomInt(8);
-        countKids = 0;
+    private int dir;
+    private int numSteps;
+
+
+    public Critter2() {
+        dir = getRandomInt(0);
+
     }
 
     @Override
     public boolean fight(String oponent) {
-        if(getRandomInt(10) > 4){
-            Critter1 c = new Critter1();
-            this.countKids++;
-            reproduce(c,c.dir);
-        }
+        numSteps++;
+        walk(dir);
         return false;
     }
 
     @Override
     public void doTimeStep() {
-        Critter1 c = new Critter1();
-        this.countKids++;
-        reproduce(c,c.dir);
+        numSteps+=2;
+        run(dir);
+
     }
+}
+    /*
     public static void runStats(java.util.List<Critter> c1){
         int total_kids = 0;
         for(Object obj: c1){
@@ -40,4 +41,6 @@ public class Critter1 extends Critter {
         System.out.println("On average, each Critter1 had " + avg+ " kids");
 
     }
+
 }
+*/

@@ -81,9 +81,9 @@ public abstract class Critter {
             moveFlag = 1;
             switch (direction) {
                 case 0: //increment x
-                    x_coord = (x_coord + 1) % (Params.world_width);
+                    x_coord = (x_coord + 1) % (Params.world_width-1);
                 case 1: //increment x, decrement y
-                    x_coord = (x_coord + 1) % (Params.world_width);
+                    x_coord = (x_coord + 1) % (Params.world_width-1);
                     if (y_coord == 0) {
                         y_coord = Params.world_height - 1;
                     } else {
@@ -118,12 +118,12 @@ public abstract class Critter {
                     } else {
                         x_coord--;
                     }
-                    y_coord = (y_coord + 1) % Params.world_height;
+                    y_coord = (y_coord + 1) % Params.world_height-1;
                 case 6: //increment y
-                    y_coord = (y_coord + 1) % Params.world_height;
+                    y_coord = (y_coord + 1) % Params.world_height-1;
                 case 7: //increment x and y
-                    y_coord = (y_coord + 1) % Params.world_height;
-                    x_coord = (x_coord + 1) % (Params.world_width);
+                    y_coord = (y_coord + 1) % Params.world_height-1;
+                    x_coord = (x_coord + 1) % (Params.world_width-1);
 
             }
         }
@@ -325,9 +325,11 @@ public abstract class Critter {
     public static void worldTimeStep() {
         int indexWinner = 0; //index of the winner
         int indexOthers = 0; //to find 2 or more critters in the same position (shouldn't be able to walk/run to a postion with a creature
+
         Collections.sort(alive, Comparator.comparingInt(Critter::getY_coord).thenComparing(Critter::getX_coord));
         for (int i = 0; i < alive.size(); i++) {
             alive.get(i).num_move = 0; //reset before each doTimeStep
+            alive.get(i).moveFlag = 0;
             alive.get(i).doTimeStep();
             alive.get(i).moveFlag = 0; //reset to 0 so can be used in fight
         }
@@ -474,12 +476,16 @@ public abstract class Critter {
 
             // Complete this method.
 
-        //adding new babies into the population
+
         for(int i = 0; i<Params.refresh_algae_count; i++){
             Algae a = new Algae();
             a.setEnergy(Params.start_energy);
-            a.setX_coord();
+            a.setX_coord(getRandomInt(Params.world_width));
+            a.setY_coord(getRandomInt(Params.world_height));
+            alive.add(a);
+            population.add(a);
         }
+        //adding new babies into the population
         for (Critter baby : babies) {
             alive.add(baby);
 
@@ -547,48 +553,89 @@ public abstract class Critter {
             }
         }
     }
-
-    public static void displayWorld() {
-        Collections.sort(alive, Comparator.comparingInt(Critter::getY_coord).thenComparing(Critter::getX_coord));
-
+    public static void displayWorld()
+    {
+        String[][] display = new String [Params.world_height+2][Params.world_width+2];
+        for(int i=0; i<Params.world_width+2; i++)            //top row
+        {
+            display[0][i]="-";
+        }
+        for(int i=0; i<Params.world_width+2; i++)            //bottom row
+        {
+            display[Params.world_height+2-1][i]="-";
+        }
+        for(int i=0; i<Params.world_height+2; i++)           //first column
+        {
+            display[i][0] = "|";
+        }
+        for(int i=0; i<Params.world_height+2; i++)           //last column
+        {
+            display[i][Params.world_width+2-1] = "|";
+        }
+        display[Params.world_height+2-1][0] = "+";
+        display[Params.world_height+2-1][Params.world_width+2-1]="+";
+        display[0][0]="+";
+        display[0][Params.world_width+2-1] = "+";
+        for(int i=0; i<alive.size(); i++)                    //Adds critters to matrix, locations with multiple critters show last critter added
+        {
+            int x_index = alive.get(i).x_coord+1;
+            int y_index = alive.get(i).y_coord+1;
+            display[x_index][y_index]=alive.get(i).toString();
+        }
+        for(int i=0; i<Params.world_height+2; i++)
+        {
+            for(int j=0; j<Params.world_width+2; j++)
+            {
+                if(display[i][j]==null)
+                {
+                    System.out.print(" ");
+                }
+                else
+                {
+                    System.out.print(display[i][j]);
+                }
+            }
+            System.out.println();
+        }
         // Complete this method.
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /*
         //First Row
         System.out.print("+");                                                    //Top left corner
-        for (int i = 0; i < Params.world_width; i++) {
+        for(int i=0; i<Params.world_width; i++)
+        {
             System.out.print("-");                                                // n dashes (width)
         }
         System.out.println("+");                                              //Top right corner
         //Middle Rows
-        int aliveIndex = 0;                                                       //iterates through alive array
-        for (int vertical = 0; vertical < Params.world_height; vertical++)            //for m rows (height)
+        int aliveIndex=0;                                                       //iterates through alive array
+        for(int vertical=0; vertical<Params.world_height; vertical++)            //for m rows (height)
         {
             System.out.print("|");                                                //Left hand wall
-            /*
-            while(alive.get(aliveIndex).y_coord<vertical)                        //Unnecessary
+            if(alive.get(aliveIndex).y_coord==vertical)                                                                 //If the Critter in alive belongs in that row
             {
-                aliveIndex++;
-            }
-            */
-            if (alive.get(aliveIndex).y_coord == vertical)                                                                 //If the Critter in alive belongs in that row
-            {
-                for (int horizontal = 0; horizontal < Params.world_width; horizontal++)                                       //For every column in that row
+                for(int horizontal = 0; horizontal < Params.world_width; horizontal++)                                       //For every column in that row
                 {
-                    if (alive.get(aliveIndex).y_coord == vertical && alive.get(aliveIndex).x_coord == horizontal)                    //If the Critter in alive belongs in that column & row
+                    if(alive.get(aliveIndex).y_coord==vertical && alive.get(aliveIndex).x_coord==horizontal)                    //If the Critter in alive belongs in that column & row
                     {
                         System.out.print(alive.get(aliveIndex));                                                                //Print it
                         aliveIndex++;                                                                                           //Next Critter
-                        while (alive.get(aliveIndex).x_coord == horizontal && alive.get(aliveIndex).y_coord == vertical)             //For every other critter in alive that has the same coordinates
+                        while(alive.get(aliveIndex).x_coord==horizontal && alive.get(aliveIndex).y_coord==vertical)             //For every other critter in alive that has the same coordinates
                         {
                             aliveIndex++;                                                                                       //Skip them
                         }
-                    } else                                                                                                //Else just print spaces for that row
+                    }
+                    else                                                                                                //Else just print spaces for that row
                     {
                         System.out.print(" ");
                     }
                 }
                 System.out.println("|");
-            } else {
-                for (int horizontal = 0; horizontal < Params.world_width; horizontal++) {
+            }
+            else
+            {
+                for(int horizontal = 0; horizontal < Params.world_width; horizontal++)
+                {
                     System.out.print(" ");
                 }
                 System.out.println("|");
@@ -596,11 +643,15 @@ public abstract class Critter {
         }
         //Last Row
         System.out.print("+");
-        for (int i = 0; i < Params.world_width; i++) {
+        for(int i=0; i<Params.world_width; i++)
+        {
             System.out.print("-");
         }
         System.out.println("+");
+        */
+        ///////////////////////////////////////////////////////
     }
+
     //pass in old x and y and index
     //returns true if moved successfully, false if no move/moves back to original position
     private boolean checkFightWalk(int x, int y) {
@@ -609,10 +660,17 @@ public abstract class Critter {
         }
         for(int i = 0; i<alive.size(); i++){
             if(this != alive.get(i) && this.x_coord == alive.get(i).x_coord && this.y_coord == alive.get(i).y_coord){
+                //can move into a position with a dead critter
+                if(alive.get(i).energy <= 0){
+                    return true;
+                }
+                else{
+                    setX_coord(x);
+                    setY_coord(y);
+                    return false;
+                }
                 //encounter during fight, revert to previous x and y position
-                setX_coord(x);
-                setY_coord(y);
-                return false;
+
             }
         }
         return true;
