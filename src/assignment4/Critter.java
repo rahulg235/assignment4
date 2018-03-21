@@ -76,6 +76,7 @@ public abstract class Critter {
      */
     protected final void walk(int direction) {
         System.out.println("WALK: Critter"+ this + " ENERGY: "+ this.energy + " DIRECTION: "+ direction + " NUM MOVE: " + num_move);
+        System.out.println("oldX: "+ x_coord + " oldY: "+ y_coord);
         this.energy = this.energy - Params.walk_energy_cost;
         this.num_move++;
         //critter cannot move more than 2 times but energy is still deducted
@@ -85,6 +86,7 @@ public abstract class Critter {
                 switch (direction) {
                     case 0: //increment x
                         x_coord = (x_coord + 1) % (Params.world_width);
+                        break;
                     case 1: //increment x, decrement y
                         x_coord = (x_coord + 1) % (Params.world_width);
                         if (y_coord <= 0) {
@@ -92,12 +94,14 @@ public abstract class Critter {
                         } else {
                             y_coord--;
                         }
+                        break;
                     case 2: //decrement y
                         if (y_coord <= 0) {
                             y_coord = Params.world_height - 1;
                         } else {
                             y_coord--;
                         }
+                        break;
                     case 3: //decrement x and y
                         if (y_coord <= 0) {
                             y_coord = Params.world_height - 1;
@@ -109,12 +113,14 @@ public abstract class Critter {
                         } else {
                             x_coord--;
                         }
+                        break;
                     case 4: //decrement x
                         if (x_coord <= 0) {
                             x_coord = Params.world_width - 1;
                         } else {
                             x_coord--;
                         }
+                        break;
                     case 5: //decrement x, increment y
                         if (x_coord <= 0) {
                             x_coord = Params.world_width - 1;
@@ -122,18 +128,23 @@ public abstract class Critter {
                             x_coord--;
                         }
                         y_coord = (y_coord + 1) % Params.world_height;
+                        break;
                     case 6: //increment y
                         y_coord = (y_coord + 1) % Params.world_height;
+                        break;
                     case 7: //increment x and y
                         y_coord = (y_coord + 1) % Params.world_height;
                         x_coord = (x_coord + 1) % (Params.world_width);
+                        break;
 
                 }
             }
         }
+        System.out.println("XCOORD: "+ x_coord + " YCOORD: "+ y_coord);
     }
     protected final void run(int direction) {
         System.out.println("RUN: Critter: "+ this + " ENERGY: " + this.energy + " DIRECTION: "+ direction + " NUM_MOVE " + num_move);
+        System.out.println("oldX: "+ x_coord + " oldY: "+ y_coord);
         energy = energy - Params.run_energy_cost;
         this.num_move++;
         //critter cannot move more than twice in each time step
@@ -143,10 +154,13 @@ public abstract class Critter {
                 //because walk energy is deducted when walk is called
                 energy = energy + Params.walk_energy_cost;
                 energy = energy + Params.walk_energy_cost;
+                num_move-= 2;
                 walk(direction);
                 walk(direction);
+
             }
         }
+        System.out.println("XCOORD: "+ x_coord + " YCOORD: "+ y_coord);
     }
 
 
@@ -157,6 +171,7 @@ public abstract class Critter {
      */
     protected final void reproduce(Critter offspring, int direction) {
         System.out.println("REPRODUCE: Critter " + this + " direction: "+ direction);
+        System.out.println("XCOORD: "+ x_coord + " YCOORD: "+ y_coord);
 
         if (this.energy < Params.min_reproduce_energy) {
             return;
