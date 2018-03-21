@@ -84,36 +84,36 @@ public abstract class Critter {
                     x_coord = (x_coord + 1) % (Params.world_width-1);
                 case 1: //increment x, decrement y
                     x_coord = (x_coord + 1) % (Params.world_width-1);
-                    if (y_coord == 0) {
+                    if (y_coord <= 0) {
                         y_coord = Params.world_height - 1;
                     } else {
                         y_coord--;
                     }
                 case 2: //decrement y
-                    if (y_coord == 0) {
+                    if (y_coord <= 0) {
                         y_coord = Params.world_height - 1;
                     } else {
                         y_coord--;
                     }
                 case 3: //decrement x and y
-                    if (y_coord == 0) {
+                    if (y_coord <= 0) {
                         y_coord = Params.world_height - 1;
                     } else {
                         y_coord--;
                     }
-                    if (x_coord == 0) {
+                    if (x_coord <= 0) {
                         x_coord = Params.world_width - 1;
                     } else {
                         x_coord--;
                     }
                 case 4: //decrement x
-                    if (x_coord == 0) {
+                    if (x_coord <= 0) {
                         x_coord = Params.world_width - 1;
                     } else {
                         x_coord--;
                     }
                 case 5: //decrement x, increment y
-                    if (x_coord == 0) {
+                    if (x_coord <= 0) {
                         x_coord = Params.world_width - 1;
                     } else {
                         x_coord--;
@@ -188,8 +188,8 @@ public abstract class Critter {
             Critter newCritter = (Critter) newCritterClass.newInstance();
             alive.add(newCritter);
 
-            newCritter.x_coord = getRandomInt(Params.world_width);
-            newCritter.y_coord = getRandomInt(Params.world_height);
+            newCritter.x_coord = getRandomInt(Params.world_width-1);
+            newCritter.y_coord = getRandomInt(Params.world_height-1);
             newCritter.energy = Params.start_energy;
 
 
@@ -337,7 +337,8 @@ public abstract class Critter {
             for (int j = i + 1; j < alive.size(); j++) {
                 //checking same position and if alive
                 if (alive.get(i).x_coord == alive.get(j).x_coord && alive.get(i).y_coord == alive.get(j).y_coord && alive.get(i).energy > 0 && alive.get(j).energy > 0) {
-
+                    System.out.println("FIGHT: "+alive.get(i) + " x: " + alive.get(i).x_coord + "y: " + alive.get(i).y_coord);
+                    System.out.println(alive.get(j) + "x: " + alive.get(i).x_coord + " y: " + alive.get(i).y_coord);
                     Critter p1 = alive.get(i);
                     Critter p2 = alive.get(j);
                     int p1_x = p1.x_coord;
