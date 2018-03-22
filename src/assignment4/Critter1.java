@@ -1,3 +1,15 @@
+/* CRITTERS Critter1.java
+ * EE422C Project 4 submission by
+ * Replace <...> with your actual data.
+ * <Rahul Gupta>
+ * <rg43226>
+ * Wed 9-10:30
+ * Kaajol Dhana
+ * krd985
+ * Wed 9-10:30
+ * Slip days used: <0>
+ * Fall 2016
+ */
 package assignment4;
 //wants to reproduce alot
 /**
@@ -6,6 +18,10 @@ package assignment4;
  *
  */
 public class Critter1 extends Critter {
+    /**
+     * String representation of Critter1 used in displayWorld
+     * @return String symbol representing the Critter
+     */
     @Override
     public String toString(){
         return "1";

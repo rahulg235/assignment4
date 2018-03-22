@@ -2,12 +2,12 @@ package assignment4;
 /* CRITTERS Critter.java
  * EE422C Project 4 submission by
  * Replace <...> with your actual data.
- * <Student1 Name>
- * <Student1 EID>
- * <Student1 5-digit Unique No.>
- * <Student2 Name>
- * <Student2 EID>
- * <Student2 5-digit Unique No.>
+ * <Rahul Gupta>
+ * <rg43226>
+ * Wed 9-10:30
+ * Kaajol Dhana
+ * krd985
+ * Wed 9-10:30
  * Slip days used: <0>
  * Fall 2016
  */
@@ -57,6 +57,7 @@ public abstract class Critter {
         return energy;
     }
 
+
     protected int getX_coord() {
         return x_coord;
     }
@@ -68,11 +69,13 @@ public abstract class Critter {
     private int x_coord;
     private int y_coord;
     private int num_move;//counts the number of times a critter has moved in a time step
-    private int moveFlag;
+    private int moveFlag;//set if a critter actually walks/runs
 
     /**
      * @param direction
-     * @TODO walk/run in fight and checking for same position
+     * changes Critter's location by 1 step based on direction
+     *can only move once in a timeStep
+     * deducts energy for each movement
      */
     protected final void walk(int direction) {
         System.out.println("WALK: Critter"+ this + " ENERGY: "+ this.energy + " DIRECTION: "+ direction + " NUM MOVE: " + num_move);
@@ -142,6 +145,11 @@ public abstract class Critter {
         }
         System.out.println("XCOORD: "+ x_coord + " YCOORD: "+ y_coord);
     }
+    /**
+     * @param direction
+     * calls walk function twice to move the Critter by two steps based on the direction
+     *
+     */
     protected final void run(int direction) {
         System.out.println("RUN: Critter: "+ this + " ENERGY: " + this.energy + " DIRECTION: "+ direction + " NUM_MOVE " + num_move);
         System.out.println("oldX: "+ x_coord + " oldY: "+ y_coord);
@@ -167,7 +175,7 @@ public abstract class Critter {
     /**
      * @param offspring
      * @param direction
-     * @TODO add new critter to collection after time step
+     * assigns energy and location for new Critter offspring
      */
     protected final void reproduce(Critter offspring, int direction) {
         System.out.println("REPRODUCE: Critter " + this + " direction: "+ direction);
@@ -176,6 +184,7 @@ public abstract class Critter {
         if (this.energy < Params.min_reproduce_energy) {
             return;
         }
+        this.energy-= Params.min_reproduce_energy;
         if (this.energy % 2 == 0) {
             offspring.energy = this.energy / 2;
             this.energy = this.energy / 2;
@@ -212,8 +221,8 @@ public abstract class Critter {
             Critter newCritter = (Critter) newCritterClass.newInstance();
             alive.add(newCritter);
 
-            newCritter.x_coord = getRandomInt(Params.world_width-1);
-            newCritter.y_coord = getRandomInt(Params.world_height-1);
+            newCritter.x_coord = getRandomInt(Params.world_width);
+            newCritter.y_coord = getRandomInt(Params.world_height);
             newCritter.energy = Params.start_energy;
 
 
@@ -343,6 +352,12 @@ public abstract class Critter {
     }
 
     /**
+     * calls each Critter's doTimeStep function
+     * checks for encounters (two critters occupying the same position)
+     * if there are two critters in the same position, they can choose to fight or not
+     * adds Algae to collection
+     * adds new babies to collection
+     * removes dead Critter from collection
      * @TODO dealing with critters in same position, incrementing time steps, reset num_moves
      * @TODO critters that walk/run in fight shouldnt move to same position as another creature
      */
@@ -543,6 +558,7 @@ public abstract class Critter {
         for (Critter c : alive) {
             if (c.energy <= 0) {
                 deadCritters.add(c);
+                System.out.println("Critter "+c + "DIED");
             }
         }
         alive.removeAll(deadCritters);
@@ -550,7 +566,13 @@ public abstract class Critter {
 
 
     }
-
+    /**
+     * @param p1
+     * @param indexWin
+     * checks to see if there are other Critters in the same position (more than 2)
+     * indexWin is the position of the Critter who won the fight
+     *
+     */
     //only be called if moveFlag = 0
     private static void checkMulitpleEncounters(Critter p1, int indexWin) {
         int indexOthers = indexWin + 1;
@@ -598,6 +620,10 @@ public abstract class Critter {
             }
         }
     }
+    /**
+     * displays the current state of the world
+     *
+     */
     public static void displayWorld()
     {
         String[][] display = new String [Params.world_height+2][Params.world_width+2];
@@ -625,7 +651,7 @@ public abstract class Critter {
         {
             int x_index = alive.get(i).x_coord+1;
             int y_index = alive.get(i).y_coord+1;
-            display[x_index][y_index]=alive.get(i).toString();
+            display[y_index][x_index]=alive.get(i).toString();
         }
         for(int i=0; i<Params.world_height+2; i++)
         {
@@ -699,6 +725,12 @@ public abstract class Critter {
 
     //pass in old x and y and index
     //returns true if moved successfully, false if no move/moves back to original position
+    /**
+     * @param x
+     * @param y
+     * checks to see if the Critter attempted to move during its fight method
+     *
+     */
     private boolean checkFightWalk(int x, int y) {
         if(moveFlag == 0) { //run or walk was not called from fight
             System.out.println("Critter"+ this + " did not call walk/run from fight method");
