@@ -1,5 +1,10 @@
 package assignment4;
 //wants to reproduce alot
+/**
+ * Critter1 wants to populate the world with Critter1's. It does not change position but reproduces in each timestep.
+ *
+ *
+ */
 public class Critter1 extends Critter {
     @Override
     public String toString(){
@@ -7,12 +12,20 @@ public class Critter1 extends Critter {
     }
     private int dir;
     private int countKids;
-
+    /**
+     * Constructor method for Critter1
+     *
+     */
     public Critter1(){
         dir = getRandomInt(8);
         countKids = 0;
     }
-
+    /**
+     * @param oponent
+     * generates random number to decide if Critter will reproduce
+     *Critter1 never wants to fight
+     *
+     */
     @Override
     public boolean fight(String oponent) {
         if(getRandomInt(10) > 4){
@@ -22,6 +35,11 @@ public class Critter1 extends Critter {
         }
         return false;
     }
+    /**
+     * reproduces in each timestep
+     * number of kids a critter has is counted
+     *
+     */
 
     @Override
     public void doTimeStep() {
@@ -29,6 +47,10 @@ public class Critter1 extends Critter {
         this.countKids++;
         reproduce(c,c.dir);
     }
+    /**
+     * prints out the average number of kids each Critter1 had
+     *
+     */
     public static void runStats(java.util.List<Critter> c1){
         int total_kids = 0;
         for(Object obj: c1){
